@@ -49,10 +49,20 @@ public class Bot
 
                     switch (message.Type)
                     {
-                        
+                        case MessageType.Text:
+                            switch (message.Text)
+                            {
+                                case "/start":
+                                    await StartCommand(message);
+                                    break;
+                                case "/convert":
+                                    await ConvertCommand(message);
+                                    break;
+                            }
+                            break;
                     }
-                    
 
+                    return;
                     // Console.WriteLine("MEssage incoming!");
                     // Console.WriteLine(update.Message.Text);
                     // return;
@@ -75,6 +85,25 @@ public class Bot
         };
         Console.WriteLine(ErrorMessage);
         return Task.CompletedTask;
+    }
+
+    private async Task StartCommand(Message message)
+    {
+        await _botClient.SendTextMessageAsync(
+            message.Chat.Id,
+            "Hello this bot can help you convert foreign currency to UAH! \n" +
+            "To begin, type /convert"
+            );
+        return;
+    }
+    
+    private async Task ConvertCommand(Message message)
+    {
+        await _botClient.SendTextMessageAsync(
+            message.Chat.Id,
+            "Enter Foreign currency code(3 letters): "
+        );
+        return;
     }
     
 }
