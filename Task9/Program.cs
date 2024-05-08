@@ -4,7 +4,6 @@
 
 class Program
 {
-    public static readonly HttpClient Client = new HttpClient();
     
     static async Task Main()
     {

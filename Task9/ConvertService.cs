@@ -11,7 +11,8 @@ public class ConvertService
     public DateOnly Date { get; private set; }
     public string Currency { get; private set; }
     private List<ExchangeRate>? _exchangeRates;
-    
+    private readonly HttpClient _сlient = new HttpClient();
+
     public ConvertService(string input)
     {
         var pattern = @"\s*[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
@@ -55,9 +56,8 @@ public class ConvertService
 
     private async Task RequestExchangeRates()
     {
-        var client = Program.Client;
         var url = $"https://api.privatbank.ua/p24api/exchange_rates?date={Date.ToString("dd.MM.yyyy")}";
-        var response = await client.GetStringAsync(url);
+        var response = await _сlient.GetStringAsync(url);
         var pbResponse = JsonConvert.DeserializeObject<PBResponse>(response);
         if (pbResponse == null)
         {
