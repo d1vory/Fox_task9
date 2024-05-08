@@ -111,34 +111,34 @@ public class Bot
 
     private async Task GetExchangeRates(Message message)
     {
-        var pattern = @"[erER]{2}\s*(\d{2}\.\d{2}\.\d{4})\s*(\w{3})";
-        var match = Regex.Match(message.Text, pattern);
-        if (!match.Success)
+        try
+        {
+            var cs = new ConvertService(message.Text);
+            var exchangeRate = await cs.GetUahExchangeValue();
+            await _botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                $"Exchange rates for <b>{exchangeRate.Currency}</b> on {cs.Date} are:\n" +
+                $"Purchase: <b>{decimal.Round(exchangeRate.PurchaseRate, 2)}</b>\n" +
+                $"Sale: <b>{decimal.Round(exchangeRate.SaleRate, 2)}</b>",
+                parseMode:ParseMode.Html
+            );
+        }
+        catch (ArgumentException ex)
         {
             await _botClient.SendTextMessageAsync(
                 message.Chat.Id,
                 "Input is not recognized, please use format <b>'er `dd.MM.YYYY` `currency`'</b>\n" +
                 "For example <b>'er 25.04.2024 USD'</b> \n",
-                parseMode:ParseMode.Html
+                parseMode: ParseMode.Html
             );
-            return;
         }
-
-        var date = DateOnly.ParseExact(match.Groups[1].ToString(), "dd.MM.yyyy",
-            System.Globalization.CultureInfo.CurrentCulture);
-        var currency = match.Groups[2].ToString();
-        
-        var cs = new ConvertService(date);
-        var exchangeRate =  await cs.GetUahExchangeValue(currency);
-
-        await _botClient.SendTextMessageAsync(
-            message.Chat.Id,
-            $"Exchange rates for <b>{exchangeRate.Currency}</b> are:\n" +
-            $"Purchase: <b>{decimal.Round(exchangeRate.PurchaseRate, 2)}</b>\n" +
-            $"Sale: <b>{decimal.Round(exchangeRate.SaleRate, 2)}</b>",
-            parseMode:ParseMode.Html
-        );
-
+        catch (ApplicationException ex)
+        {
+            await _botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                ex.Message
+            );
+        }
     }
     
 }

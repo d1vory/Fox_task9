@@ -1,29 +1,58 @@
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Telegram.Bot.Types.Enums;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Task9;
 
 public class ConvertService
 {
-    public ConvertService(DateOnly date)
+    public ConvertService(string input)
     {
-        Date = date;
+        var pattern = @"[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
+        var match = Regex.Match(input, pattern);
+        if (!match.Success)
+        {
+            throw new ArgumentException("Input is not valid, use 'er `dd.MM.YYYY` `currency`' format");
+        }
+
+        try
+        {
+            Date = DateOnly.ParseExact(
+                match.Groups[1].ToString(), 
+                ["dd.MM.yyyy", "d.M.yyyy", "dd/MM/yyyy", "d/M/yyyy"],
+                System.Globalization.CultureInfo.CurrentCulture
+            );
+        }
+        catch (FormatException)
+        {
+            throw new ApplicationException("Given date is not valid");
+        }
+
+        Currency = match.Groups[2].ToString();
+
+        string[] allowedCurrencies = ["USD", "EUR", "CHF", "GBP", "PLZ", "SEK", "XAU", "CAD"];
+        if (!allowedCurrencies.Any(c => c.Equals(Currency, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            throw new ApplicationException("Given currency is not valid");
+        }
     }
     
-    public DateOnly Date { get; }
+    public DateOnly Date { get; private set; }
+    public string Currency { get; private set; }
     private List<ExchangeRate>? _exchangeRates;
     
-    public async Task<ExchangeRate> GetUahExchangeValue(string foreignCurrency)
+    public async Task<ExchangeRate> GetUahExchangeValue()
     {
         if (_exchangeRates == null)
         {
             await RequestExchangeRates();
         }
 
-        var exchangeRate = _exchangeRates.Find(rate => rate.Currency.Equals(foreignCurrency, StringComparison.CurrentCultureIgnoreCase));
+        var exchangeRate = _exchangeRates.Find(rate => rate.Currency.Equals(Currency, StringComparison.CurrentCultureIgnoreCase));
         if (exchangeRate == null)
         {
-            throw new ArgumentException("Given currency is not valid");
+            throw new ApplicationException("Exchange rate for given currency and date is not found!");
         }
 
         return exchangeRate;
