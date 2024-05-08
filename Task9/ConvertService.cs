@@ -84,8 +84,17 @@ public class ExchangeRate
     public string Currency {get;set;}
         
     [JsonProperty("saleRate")]
-    public decimal SaleRate {get;set;}
+    public decimal? SaleRatePB {get;set;}
         
     [JsonProperty("purchaseRate")]
-    public decimal PurchaseRate {get;set;}
+    public decimal? PurchaseRatePB {get;set;}
+    
+    [JsonProperty("saleRateNB")]
+    public decimal SaleRateNB {get;set;}
+        
+    [JsonProperty("purchaseRateNB")]
+    public decimal PurchaseRateNB {get;set;}
+
+    public decimal SaleRate => SaleRatePB ?? SaleRateNB;
+    public decimal PurchaseRate => PurchaseRatePB ?? PurchaseRateNB;
 }
