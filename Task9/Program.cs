@@ -7,8 +7,8 @@ class Program
         // var bot = new Bot("7109512993:AAGt9rFAfqkVeN9OIdBKRXbmv2xCfWtiSzc");
         // await bot.Start();
 
-        var cs = new ConvertService("USD", new DateOnly(2024, 2, 2));
-        await cs.GetUAHExchangeValue();
+        var cs = new ConvertService( new DateOnly(2024, 4, 30));
+        var kek =  await cs.GetUahExchangeValue("usd");
 
     }
 }

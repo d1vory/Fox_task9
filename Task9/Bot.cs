@@ -63,9 +63,6 @@ public class Bot
                     }
 
                     return;
-                    // Console.WriteLine("MEssage incoming!");
-                    // Console.WriteLine(update.Message.Text);
-                    // return;
                 }
             }
         }
