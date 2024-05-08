@@ -9,7 +9,7 @@ public class ConvertService
 {
     public ConvertService(string input)
     {
-        var pattern = @"[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
+        var pattern = @"\s*[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
         var match = Regex.Match(input, pattern);
         if (!match.Success)
         {
