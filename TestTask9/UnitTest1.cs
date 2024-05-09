@@ -43,6 +43,29 @@ public class TestConvertService
             cs = new ConvertService(input);
             await Assert.ThrowsExceptionAsync<ApplicationException>(() => cs.GetUahExchangeValue(), $"No exception for {input}");
         }
+    }
 
+
+    [TestMethod]
+    public void TestCheckInput()
+    {
+        string[] invalidInputs = [
+            "", "abc", "20.02.2024 USD", "er aa.dd.2214 USD",  "er !20.02.2024 USD",
+            "er 20.02.2024 21", "er 20.02.2024 ab", "er 20:02:2024 USD", "er 20\\02\\2024 USD"
+        ];
+        string[] validInputs = [
+            "er 20.02.2024 USD", "ER 1.2.2024 USD", "Er 1.02.2024 USD", "eR 01.2.2024 USD", "er 01/2/2024 USD",
+            "  er          20.02.2024               USD", "er 20.02.2024 USD", "er 20.02.2024 USD", 
+            "asdader 20.02.2024 USD",
+        ];
+        
+        foreach (var input in invalidInputs)
+        {
+            Assert.IsFalse(ConvertService.CheckInput(input, out var tempDate, out var tempCurrency), $"exception for {input}");
+        }
+        foreach (var input in validInputs)
+        {
+            Assert.IsTrue(ConvertService.CheckInput(input, out var tempDate, out var tempCurrency), $"exception for {input}");
+        }
     }
 }

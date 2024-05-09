@@ -15,21 +15,19 @@ public class ConvertService
 
     public ConvertService(string input)
     {
-        var pattern = @"\s*[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
-        var match = Regex.Match(input, pattern);
-        if (!match.Success)
+        if (!CheckInput(input, out var stringDate, out var parsedCurrency))
         {
             throw new ArgumentException("Input is not valid, use 'er `dd.MM.YYYY` `currency`' format");
         }
-
-        var isDateValid = DateOnly.TryParse(match.Groups[1].ToString(), out var parsedDate);
+        
+        var isDateValid = DateOnly.TryParse(stringDate, out var parsedDate);
         if (!isDateValid)
         {
             throw new ApplicationException("Given date is not valid");
         }
 
         Date = parsedDate;
-        Currency = match.Groups[2].ToString();
+        Currency = parsedCurrency;
 
         string[] allowedCurrencies = ["USD", "EUR", "CHF", "GBP", "PLZ", "SEK", "XAU", "CAD"];
         if (!allowedCurrencies.Any(c => c.Equals(Currency, StringComparison.InvariantCultureIgnoreCase)))
@@ -52,6 +50,22 @@ public class ConvertService
         }
 
         return exchangeRate;
+    }
+
+    public static bool CheckInput(string input, out string date, out string currency)
+    {
+        var pattern = @"\s*[erER]{2}\s*(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{4})\s*(\w{3})";
+        var match = Regex.Match(input, pattern);
+        if (match.Success && match.Groups.Count == 3)
+        {
+            date = match.Groups[1].ToString();
+            currency = match.Groups[2].ToString();
+            return true;
+        }
+
+        date = "";
+        currency = "";
+        return false;
     }
 
     private async Task RequestExchangeRates()
