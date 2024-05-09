@@ -10,6 +10,10 @@ public class ConvertService
         
     public DateOnly Date { get; private set; }
     public string Currency { get; private set; }
+    public static readonly string[] AllowedCurrencies = [
+        "USD", "EUR", "CHF", "GBP", "PLZ", "SEK", "XAU", "CAD"
+    ];
+    
     private List<ExchangeRate>? _exchangeRates;
     private readonly HttpClient _сlient = new HttpClient();
 
@@ -20,20 +24,8 @@ public class ConvertService
             throw new ArgumentException("Input is not valid, use 'er `dd.MM.YYYY` `currency`' format");
         }
         
-        var isDateValid = DateOnly.TryParse(stringDate, out var parsedDate);
-        if (!isDateValid)
-        {
-            throw new ApplicationException("Given date is not valid");
-        }
-
-        Date = parsedDate;
-        Currency = parsedCurrency;
-
-        string[] allowedCurrencies = ["USD", "EUR", "CHF", "GBP", "PLZ", "SEK", "XAU", "CAD"];
-        if (!allowedCurrencies.Any(c => c.Equals(Currency, StringComparison.InvariantCultureIgnoreCase)))
-        {
-            throw new ApplicationException("Given currency is not valid");
-        }
+        Date = CheckDate(stringDate);
+        Currency = CheckCurrency(parsedCurrency);
     }
 
     public async Task<ExchangeRate> GetUahExchangeValue()
@@ -66,6 +58,27 @@ public class ConvertService
         date = "";
         currency = "";
         return false;
+    }
+
+    public static DateOnly CheckDate(string inputDate)
+    {
+        var isDateValid = DateOnly.TryParse(inputDate, out var parsedDate);
+        if (!isDateValid)
+        {
+            throw new ApplicationException("Given date is not valid");
+        }
+
+        return parsedDate;
+    }
+
+    public static string CheckCurrency(string inputCurrency)
+    {
+        if (!AllowedCurrencies.Any(c => c.Equals(inputCurrency, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            throw new ApplicationException("Given currency is not valid");
+        }
+
+        return inputCurrency;
     }
 
     private async Task RequestExchangeRates()

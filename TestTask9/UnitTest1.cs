@@ -68,4 +68,37 @@ public class TestConvertService
             Assert.IsTrue(ConvertService.CheckInput(input, out var tempDate, out var tempCurrency), $"exception for {input}");
         }
     }
+
+
+    [TestMethod]
+    public void TestCheckDate()
+    {
+        string[] validDates = ["12.01.2024", "30.3.2022", "1.2.2024", "04/09/2020"];
+        foreach (var input in validDates)
+        {
+            ConvertService.CheckDate(input);
+        }
+        string[] invalidDates = ["20\\02\\2024", "30.02.2022", "40.02.2024", "99.99.9999"];
+        foreach (var input in invalidDates)
+        {
+            Assert.ThrowsException<ApplicationException>(() => ConvertService.CheckDate(input), $"No exception for {input}");
+        }
+    }
+
+
+    [TestMethod]
+    public void TestCheckCurrency()
+    {
+        foreach (var input in ConvertService.AllowedCurrencies)
+        {
+            ConvertService.CheckCurrency(input.ToUpper());
+            ConvertService.CheckCurrency(input.ToLower());
+        }
+
+        string[] invalidInputs = ["abc", "", "qwe", "USDD", "TEsT"];
+        foreach (var input in invalidInputs)
+        {
+            Assert.ThrowsException<ApplicationException>(() => ConvertService.CheckCurrency(input), $"No exception for {input}");
+        }
+    }
 }
